@@ -557,8 +557,14 @@ def main(args=None):
                 logger.info(f"deepspeed_env file = {environ_file}")
                 with open(environ_file, 'r') as fd:
                     for var in fd.readlines():
-                        key, val = var.split('=', maxsplit=1)
-                        runner.add_export(key, val)
+                        var = var.split('=', maxsplit=1)
+                        if len(var) == 1:
+                            key = var[0].strip()
+                            val = env.get(key)
+                            if val is not None:
+                                runner.add_export(key, val)
+                        else:
+                            runner.add_export(var[0], var[1])
 
         if args.launcher == PDSH_LAUNCHER:
             cmd, kill_cmd, env = runner.get_cmd(env, active_resources)
